@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+.Python
+*.egg-info/
+
+# Virtual environment
+.venv/
+venv/
+
+# Environment / secrets
+.env
+.env.local
+
+# Data files — never commit raw data
+/data/
+*.csv
+*.tsv
+*.parquet
+
+# Model checkpoints
+checkpoints/
+*.pt
+*.pth
+*.bin
+*.safetensors
+
+# Notebooks
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+
+# WandB
+wandb/
+
+# HuggingFace cache
+.cache/
