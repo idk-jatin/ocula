@@ -31,18 +31,18 @@ class DatasetLoader:
             raise FileNotFoundError(f"Dataset not found: {path}\n")
 
     def hatexplain(self):
-        from datasets import load_dataset
-
+        import json
+        import urllib.request
         logger.info("Loading HateXplain Dataset...")
-        ds = load_dataset("Hate-speech-CNERG/hatexplain",trust_remote_code=True)
-        label_map = {0:"hatespeech",1:"normal",2:"offensive"}
+        url = "https://raw.githubusercontent.com/hate-alert/HateXplain/master/Data/dataset.json"
+        with urllib.request.urlopen(url) as response:
+            data = json.loads(response.read().decode())
         rows = []
-        for split in ["train","validation","test"]:
-            for ex in [split]:
-                text = " ".join(ex["post_tokens"])
-                votes = [a["label"] for a in ex["annotators"]]
-                majority = collections.Counter(votes).most_common(1)[0][0]
-                rows.append(self._row(text,label_map[majority],"hatexplain","en"))
+        for _,ex in data.items():
+            text = " ".join(ex["post_tokens"])
+            votes = [a["label"] for a in ex["annotators"]]
+            majority = collections.Counter(votes).most_common(1)[0][0]
+            rows.append(self._row(text, majority, "hatexplain", "en"))
         df = pd.DataFrame(rows)
         logger.info(f"HateXplain Dataset: {len(df):,} rows loaded!")
         return df
@@ -51,7 +51,7 @@ class DatasetLoader:
         from datasets import load_dataset
 
         logger.info("Loading Davidson Dataset...")
-        ds = load_dataset("tdavidson/hate_speech_offensive",trust_remote_code=True)
+        ds = load_dataset("tdavidson/hate_speech_offensive")
         rows = []
         for ex in ds["train"]:
             rows.append(self._row(ex["tweet"],str(ex["class"]),"davidson","en"))
@@ -67,7 +67,7 @@ class DatasetLoader:
         df_raw = pd.read_csv(path,sep='\t')
         rows=[]
         for _,row in df_raw.iterrows():
-            rows.append(self._row(row["test"],row["task_2"],"hasoc_english","en"))
+            rows.append(self._row(row["text"],row["task_2"],"hasoc_english","en"))
         df = pd.DataFrame(rows)
         logger.info(f"Hasoc English Dataset: {len(df):,} rows loaded!")
         return df
@@ -80,7 +80,7 @@ class DatasetLoader:
         df_raw = pd.read_csv(path,sep='\t')
         rows=[]
         for _,row in df_raw.iterrows():
-            rows.append(self._row(row["test"],row["task_2"],"hasoc_hindi","hi"))
+            rows.append(self._row(row["text"],row["task_2"],"hasoc_hindi","hi"))
         df = pd.DataFrame(rows)
         logger.info(f"Hasoc Hindi Dataset: {len(df):,} rows loaded!")
         return df
@@ -97,6 +97,7 @@ class DatasetLoader:
             rows.append(self._row(row["Comment"],row['Label'],"indo_hate","hi-Latn"))
         df = pd.DataFrame(rows)
         logger.info(f"IndoHateSpeech Dataset: {len(df):,} rows loaded!")
+        return df
 
     def load_all(self):
         loaders = [self.hatexplain,self.davidson,self.hasoc_english,self.hasoc_hindi,self.indo_hate]
@@ -107,7 +108,7 @@ class DatasetLoader:
             except FileNotFoundError as e:
                 logger.warning(f"Skipping: {e}")
             except Exception as e:
-                logger.warning(f"Skipping{fn.__name__} | Found Error: {e}")
+                logger.warning(f"Skipping {fn.__name__} | Found Error: {e}")
 
         combined = pd.concat(dfs,ignore_index=True)
         logger.info(f"Total combined: {len(combined):,} rows loaded!")

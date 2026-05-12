@@ -6,7 +6,7 @@ LABEL2ID ={
 
 ID2LABEL = {v:k for k,v in LABEL2ID.items()}
 
-NUM_LABELs = 3
+NUM_LABELS = 3
 
 BRIDGE = {
 "hatexplain":{
