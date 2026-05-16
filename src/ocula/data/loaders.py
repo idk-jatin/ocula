@@ -17,9 +17,12 @@ class DatasetLoader:
         self.raw_dir = Path(raw_dir)
 
     def _row(self,text,raw_label,dataset,lang):
+        text = str(text).strip()
+        if not text:
+            return None
         label_int = map_label(dataset,raw_label)
         return {
-            "text":str(text).strip(),
+            "text":text,
             "label_int":label_int,
             "label_str":ID2LABEL[label_int],
             "source":dataset,
