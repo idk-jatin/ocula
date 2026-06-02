@@ -2,7 +2,7 @@
 
 **Multilingual Multimodal Hate Speech Detection & Explainability**
 
-> See the hate. Understand why. In Hindi/English.
+> See the hate. Understand why. In Hindi/English. Stop the hate.
 
 ## What is OCULA?
 OCULA detects hate speech in social media content across three classes:
