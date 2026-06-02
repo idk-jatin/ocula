@@ -13,10 +13,10 @@ venv/
 .env.local
 
 # Data files — never commit raw data
-/data/
-*.csv
-*.tsv
-*.parquet
+# /data/
+# *.csv
+# *.tsv
+# *.parquet
 
 # Model checkpoints
 checkpoints/
