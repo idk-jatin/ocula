@@ -1,0 +1,33 @@
+{
+  "model": "xlm-roberta-base",
+  "macro_f1": 0.7867,
+  "weighted_f1": 0.8401,
+  "per_class_f1": {
+    "hate": 0.6438,
+    "offensive": 0.8228,
+    "normal": 0.8935
+  },
+  "confusion_matrix": [
+    [
+      931,
+      157,
+      88
+    ],
+    [
+      427,
+      2948,
+      291
+    ],
+    [
+      358,
+      395,
+      4751
+    ]
+  ],
+  "report": "              precision    recall  f1-score   support\n\n        hate     0.5425    0.7917    0.6438      1176\n   offensive     0.8423    0.8041    0.8228      3666\n      normal     0.9261    0.8632    0.8935      5504\n\n    accuracy                         0.8341     10346\n   macro avg     0.7703    0.8197    0.7867     10346\nweighted avg     0.8528    0.8341    0.8401     10346\n",
+  "alpha_weights": [
+    1.9554,
+    0.6269,
+    0.4177
+  ]
+}

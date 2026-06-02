@@ -1,0 +1,33 @@
+{
+  "model": "google/muril-base-cased",
+  "macro_f1": 0.7971,
+  "weighted_f1": 0.844,
+  "per_class_f1": {
+    "hate": 0.6731,
+    "offensive": 0.8246,
+    "normal": 0.8936
+  },
+  "confusion_matrix": [
+    [
+      873,
+      207,
+      96
+    ],
+    [
+      303,
+      3069,
+      294
+    ],
+    [
+      242,
+      502,
+      4760
+    ]
+  ],
+  "report": "              precision    recall  f1-score   support\n\n        hate     0.6157    0.7423    0.6731      1176\n   offensive     0.8123    0.8372    0.8246      3666\n      normal     0.9243    0.8648    0.8936      5504\n\n    accuracy                         0.8411     10346\n   macro avg     0.7841    0.8148    0.7971     10346\nweighted avg     0.8495    0.8411    0.8440     10346\n",
+  "alpha_weights": [
+    1.9554,
+    0.6269,
+    0.4177
+  ]
+}

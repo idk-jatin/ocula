@@ -19,12 +19,12 @@ venv/
 # *.parquet
 
 # Model checkpoints
-checkpoints/
+# checkpoints/
 *.pt
 *.pth
 *.bin
 *.safetensors
-
+checkpoint-*
 # Notebooks
 .ipynb_checkpoints/
 

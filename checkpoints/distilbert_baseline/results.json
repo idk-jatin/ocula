@@ -1,0 +1,33 @@
+{
+  "model": "distilbert-base-uncased",
+  "macro_f1": 0.7828,
+  "weighted_f1": 0.8358,
+  "per_class_f1": {
+    "hate": 0.6426,
+    "offensive": 0.8148,
+    "normal": 0.8911
+  },
+  "confusion_matrix": [
+    [
+      854,
+      231,
+      91
+    ],
+    [
+      348,
+      3009,
+      309
+    ],
+    [
+      280,
+      480,
+      4744
+    ]
+  ],
+  "report": "              precision    recall  f1-score   support\n\n        hate     0.5762    0.7262    0.6426      1176\n   offensive     0.8089    0.8208    0.8148      3666\n      normal     0.9222    0.8619    0.8911      5504\n\n    accuracy                         0.8319     10346\n   macro avg     0.7691    0.8030    0.7828     10346\nweighted avg     0.8427    0.8319    0.8358     10346\n",
+  "alpha_weights": [
+    1.9554,
+    0.6269,
+    0.4177
+  ]
+}
