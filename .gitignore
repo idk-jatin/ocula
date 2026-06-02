@@ -24,7 +24,7 @@ venv/
 *.pth
 *.bin
 *.safetensors
-checkpoint-*
+# checkpoint-*
 # Notebooks
 .ipynb_checkpoints/
 
