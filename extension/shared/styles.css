@@ -1,0 +1,128 @@
+/* ── OCULA Overlay Styles ────────────────────────────────────────── */
+
+/* Left border on flagged posts */
+.ocula-border-hate {
+  border-left: 4px solid #E74C3C !important;
+  padding-left: 8px !important;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.ocula-border-offensive {
+  border-left: 4px solid #F39C12 !important;
+  padding-left: 8px !important;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* ── Badge ───────────────────────────────────────────────────────── */
+.ocula-badge {
+  display:     inline-flex;
+  align-items: center;
+  gap:         4px;
+  padding:     2px 8px;
+  border-radius: 12px;
+  font-size:   11px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  margin-left: 8px;
+  cursor:      pointer;
+  position:    relative;
+  user-select: none;
+  vertical-align: middle;
+  z-index:     9000;
+  white-space: nowrap;
+}
+
+.ocula-badge-hate {
+  background: #FDECEA;
+  color:      #C0392B;
+  border:     1px solid #E74C3C;
+}
+
+.ocula-badge-offensive {
+  background: #FEF9E7;
+  color:      #D68910;
+  border:     1px solid #F39C12;
+}
+
+/* ── Tooltip ─────────────────────────────────────────────────────── */
+.ocula-tooltip {
+  display:     none;
+  position:    absolute;
+  top:         calc(100% + 6px);
+  left:        0;
+  background:  #1A1A2E;
+  color:       #FFFFFF;
+  border-radius: 10px;
+  padding:     12px 14px;
+  font-size:   12px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  min-width:   210px;
+  max-width:   290px;
+  box-shadow:  0 6px 24px rgba(0,0,0,0.35);
+  z-index:     99999;
+  line-height: 1.5;
+  pointer-events: none;
+}
+
+.ocula-badge:hover .ocula-tooltip {
+  display: block;
+}
+
+.ocula-tooltip-title {
+  font-size:    10px;
+  color:        #94A3B8;
+  margin-bottom: 7px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight:  600;
+}
+
+.ocula-token {
+  display:      inline-block;
+  margin:       2px 3px;
+  padding:      2px 7px;
+  border-radius: 5px;
+  font-size:    12px;
+  font-weight:  500;
+}
+
+.ocula-token-hate {
+  background: rgba(231, 76, 60, 0.22);
+  color:      #FF8A80;
+}
+
+.ocula-token-offensive {
+  background: rgba(243, 156, 18, 0.22);
+  color:      #FFD180;
+}
+
+.ocula-conf {
+  font-size:  10px;
+  color:      #64748B;
+  margin-top: 8px;
+  border-top: 1px solid #2D3748;
+  padding-top: 6px;
+}
+
+/* ── Inline word highlights ─────────────────────────────────────── */
+.ocula-word-high {
+  background:    rgba(231, 76, 60, 0.38);
+  border-radius: 2px;
+  padding:       0 2px;
+}
+
+.ocula-word-med {
+  background:    rgba(231, 76, 60, 0.20);
+  border-radius: 2px;
+  padding:       0 2px;
+}
+
+.ocula-word-high.offensive {
+  background: rgba(243, 156, 18, 0.35);
+}
+
+.ocula-word-med.offensive {
+  background: rgba(243, 156, 18, 0.18);
+}

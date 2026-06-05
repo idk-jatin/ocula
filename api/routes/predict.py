@@ -19,23 +19,78 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 _cleaner = TextCleaner(lowercase=True)
 
-CHECKPOINT_DIR = Path("checkpoints/muril_base/checkpoint-25870")
-MODEL_NAME = "google/muril-base-cased"
 MAX_LENGTH = 128
 
-model_state = {
-    "model":None,
-    "tokenizer":None,
-    "device": None,
-    "model_name":MODEL_NAME
+MODELS_CONFIG = {
+    "muril": {
+        "checkpoint": Path("checkpoints/muril_base/checkpoint-25870"),
+        "model_name": "google/muril-base-cased",
+    },
+    "xlm_roberta": {
+        "checkpoint": Path("checkpoints/xlm_roberta/checkpoint-15522"),
+        "model_name": "xlm-roberta-base",
+    }
 }
 
-def load_model():
+model_state = {
+    "muril": {
+        "model": None,
+        "tokenizer": None,
+        "device": None
+    },
+    "xlm_roberta": {
+        "model": None,
+        "tokenizer": None,
+        "device": None
+    }
+}
 
-    if model_state["model"] is not None:
-        return
+def detect_language_route(text):
+    text_clean = text.strip()
+    if not text_clean:
+        return "xlm_roberta"
+        
+    # 1. Devanagari character detection -> MuRIL
+    if re.search(r"[\u0900-\u097F]", text_clean):
+        return "muril"
+        
+    # 2. Check for common Hinglish particles/pronouns (routes immediately to MuRIL)
+    words = set(re.findall(r"\b[a-z]+\b", text_clean.lower()))
+    HINGLISH_PARTICLES = {
+        "hai", "hain", "hoon", "hu", "ho", "ka", "ki", "ke", "ko", "se", "pe",
+        "aur", "bhi", "toh", "ya", "kya", "kab", "kyun", "kyu", "kaha",
+        "kidhar", "kaise", "ye", "yeh", "wo", "woh", "jo", "tum", "aap", "mujhe",
+        "mera", "meri", "apna", "apni", "tere", "tera", "teri", "bhai", "yaar",
+        "nahi", "nahin", "nhi", "tha", "thi", "raha", "rha", "rahi", "rhi", "rahe",
+        "rhe", "karna", "karo", "kar", "kiya", "diya", "liye", "chalo", "achha",
+        "acha", "ganda", "badhiya", "chor"
+    }
+    if words.intersection(HINGLISH_PARTICLES):
+        return "muril"
+        
+    # 3. Probability check using langdetect (if English is present with >10% probability)
+    try:
+        from langdetect import detect_langs, DetectorFactory
+        DetectorFactory.seed = 0
+        langs = detect_langs(text_clean)
+        for l in langs:
+            if l.lang == "en" and l.prob > 0.1:
+                return "xlm_roberta"
+    except Exception:
+        pass
+        
+    return "muril"
+
+def load_model(model_key="muril"):
+    state = model_state[model_key]
+    if state["model"] is not None:
+        return state["model"], state["tokenizer"], state["device"]
+        
+    config = MODELS_CONFIG[model_key]
+    checkpoint_dir = config["checkpoint"]
+    model_name = config["model_name"]
     
-    logger.info(f"Loading Muril from {CHECKPOINT_DIR} ...")
+    logger.info(f"Loading {model_key} model ({model_name}) from {checkpoint_dir} ...")
     t0 = time.perf_counter()
 
     from transformers import AutoTokenizer
@@ -44,9 +99,9 @@ def load_model():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    model = OculaClassifier(model_name=MODEL_NAME)
+    model = OculaClassifier(model_name=model_name)
 
-    weights_path = CHECKPOINT_DIR / "model.safetensors"
+    weights_path = checkpoint_dir / "model.safetensors"
 
     state_dict = load_file(str(weights_path))
     model.load_state_dict(state_dict)
@@ -54,14 +109,24 @@ def load_model():
     model = model.to(device)
     model.eval()
 
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    model_state["model"] = model
-    model_state["device"] = device
-    model_state["tokenizer"] = tokenizer
+    state["model"] = model
+    state["device"] = device
+    state["tokenizer"] = tokenizer
 
     elapsed = round((time.perf_counter()- t0)*1000)
-    logger.info(f"Model loaded in {elapsed}ms on {device}")
+    logger.info(f"{model_key} model loaded in {elapsed}ms on {device}")
+    
+    return model, tokenizer, device
+
+def get_model_for_text(text):
+    model_key = detect_language_route(text)
+    log_msg = f"[ROUTING] Text: '{text[:60]}...' -> Selected Model: {model_key.upper()}"
+    print(log_msg, flush=True)
+    logger.info(log_msg)
+    model, tokenizer, device = load_model(model_key)
+    return model, tokenizer, device, model_key
 
 
 def clean_text(text):
@@ -76,7 +141,10 @@ def extract_word_importance(input_ids,attention_mask,attentions,tokenizer,org_te
     ids = input_ids[0].cpu().numpy()
     tokens = tokenizer.convert_ids_to_tokens(ids)
 
-    SKIP = {'[CLS]', '[SEP]', '[PAD]', '[UNK]', '[MASK]'}
+    SKIP = {'[CLS]', '[SEP]', '[PAD]', '[UNK]', '[MASK]', '<s>', '</s>', '<pad>', '<unk>', '<mask>'}
+
+    # Detect if SentencePiece (e.g., xlm-roberta) is used
+    is_sentencepiece = any(t.startswith('\u2581') for t in tokens if t not in SKIP)
 
     words     = []
     buf_word  = ''
@@ -91,16 +159,28 @@ def extract_word_importance(input_ids,attention_mask,attentions,tokenizer,org_te
                 buf_score = 0.0
             continue
 
-        if token.startswith('##'):
-            # Continuation subword — append to current word
-            buf_word  += token[2:]
-            buf_score  = max(buf_score, float(score))
+        if is_sentencepiece:
+            if token.startswith('\u2581'):
+                # New word starts
+                if buf_word:
+                    words.append((buf_word, buf_score))
+                buf_word  = token[1:]  # strip the SentencePiece prefix
+                buf_score = float(score)
+            else:
+                # Continuation subword
+                buf_word  += token
+                buf_score = max(buf_score, float(score))
         else:
-            # New word starts — flush previous word first
-            if buf_word:
-                words.append((buf_word, buf_score))
-            buf_word  = token
-            buf_score = float(score)
+            if token.startswith('##'):
+                # Continuation subword — append to current word
+                buf_word  += token[2:]
+                buf_score  = max(buf_score, float(score))
+            else:
+                # New word starts — flush previous word first
+                if buf_word:
+                    words.append((buf_word, buf_score))
+                buf_word  = token
+                buf_score = float(score)
     
     if buf_word:
         words.append((buf_word, buf_score))
@@ -135,15 +215,12 @@ def extract_word_importance(input_ids,attention_mask,attentions,tokenizer,org_te
 @router.post("/predict",response_model=PredictResponse)
 async def predict(req:PredictRequest):
     t0 = time.perf_counter()
-    load_model()
-
-    model = model_state["model"]
-    tokenizer = model_state["tokenizer"]
-    device = model_state["device"]
     
     text = clean_text(req.text)
     if not text:
         raise HTTPException(status_code=400, detail="Empty text after cleaning")
+
+    model, tokenizer, device, model_key = get_model_for_text(text)
 
     enc = tokenizer(text,return_tensors = "pt",max_length=MAX_LENGTH,truncation=True,padding=True)
     enc = {k:v.to(device) for k,v in enc.items()}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OCULA - Analysis</title>
+  <link rel="stylesheet" href="analysis.css">
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-logo">👁 OCULA</div>
+    <div class="page-subtitle">
+      Paste any text to classify it with full SHAP token-level explainability.
+      Supports English, Hindi, and Hinglish.
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-card">
+    <textarea id="inputText"
+      placeholder="Paste or type text here (English, Hindi, or Hinglish)…"
+      rows="4"
+      maxlength="2000"></textarea>
+    <div class="input-footer">
+      <span id="charCount" class="char-count">0 / 2000</span>
+      <button id="analyzeBtn">Analyse &rarr;</button>
+    </div>
+    <div class="input-hint">
+      Press <kbd>Ctrl+Enter</kbd> to analyse &nbsp;·&nbsp;
+      SHAP analysis takes 5–10 seconds
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading" class="loading hidden">
+    <div class="spinner"></div>
+    <div>
+      <div class="loading-title">Running SHAP analysis…</div>
+      <div class="loading-sub">This may take 5–10 seconds on first run</div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div id="errorBox" class="error-box hidden"></div>
+
+  <!-- Results -->
+  <div id="results" class="hidden">
+
+    <!-- Label banner -->
+    <div id="labelBanner" class="label-banner">
+      <div>
+        <div id="labelTitle" class="label-title">Hate Speech</div>
+        <div id="labelConf"  class="label-conf">94% confidence</div>
+      </div>
+      <div id="latencyBadge" class="latency-badge"></div>
+    </div>
+
+    <!-- Probability bars -->
+    <div class="card">
+      <div class="card-head">Class Probabilities</div>
+      <div class="prob-list">
+        <div class="prob-item">
+          <span class="prob-label l-hate">Hate</span>
+          <div class="prob-track"><div id="barHate" class="prob-fill f-hate"></div></div>
+          <span id="pctHate" class="prob-pct">0%</span>
+        </div>
+        <div class="prob-item">
+          <span class="prob-label l-offensive">Offensive</span>
+          <div class="prob-track"><div id="barOffensive" class="prob-fill f-offensive"></div></div>
+          <span id="pctOffensive" class="prob-pct">0%</span>
+        </div>
+        <div class="prob-item">
+          <span class="prob-label l-normal">Normal</span>
+          <div class="prob-track"><div id="barNormal" class="prob-fill f-normal"></div></div>
+          <span id="pctNormal" class="prob-pct">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Highlighted text -->
+    <div class="card">
+      <div class="card-head">
+        Token Highlights
+        <span class="card-sub">SHAP: words coloured by influence on prediction</span>
+      </div>
+      <div id="highlightedText" class="highlight-box"></div>
+    </div>
+
+    <!-- Token chart -->
+    <div class="card">
+      <div class="card-head">Top Influential Words</div>
+      <div id="tokenChart" class="token-chart"></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="analysis.js"></script>
+</body>
+</html>

@@ -12,7 +12,7 @@ from fastapi import APIRouter,HTTPException
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from api.schemas import ExplainRequest, ExplainResponse, TokenScore
-from api.routes.predict import load_model,model_state,clean_text,MAX_LENGTH
+from api.routes.predict import clean_text,MAX_LENGTH,get_model_for_text
 
 from src.ocula.data.bridge_map import ID2LABEL
 
@@ -20,10 +20,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-def run_shap(text,top_k):
-    model = model_state["model"]
-    tokenizer = model_state["tokenizer"]
-    device    = model_state["device"]
+def run_shap(text,top_k,model,tokenizer,device):
 
     def predict(texts):
         texts = [str(t) for t in texts]
@@ -136,17 +133,19 @@ def build_html_highlight(text,token_scores,label_id):
 @router.post("/explain", response_model=ExplainResponse)
 async def explain(req: ExplainRequest):
 
-    try:
-        load_model()
-    except FileNotFoundError as e:
-        raise HTTPException(status_code=503, detail=str(e))
-
     text = clean_text(req.text)
     if not text:
         raise HTTPException(status_code=400, detail="Empty text after cleaning")
 
     try:
-        token_scores,html_highlight,label,label_id,confidence,prob_dict = run_shap(text, top_k=req.top_k)
+        model, tokenizer, device, model_key = get_model_for_text(text)
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+    try:
+        token_scores,html_highlight,label,label_id,confidence,prob_dict = run_shap(
+            text, top_k=req.top_k, model=model, tokenizer=tokenizer, device=device
+        )
     except Exception as e:
         logger.error(f"SHAP failed: {e}")
         raise HTTPException(status_code=500, detail=f"Explanation failed: {str(e)}")

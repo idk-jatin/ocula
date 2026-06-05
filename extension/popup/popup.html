@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OCULA</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <span class="logo">👁&nbsp;OCULA</span>
+    <label class="toggle-wrap" title="Enable / Disable">
+      <input type="checkbox" id="enabledToggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-val" id="scannedCount">0</div>
+      <div class="stat-lbl">Scanned</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-val red" id="flaggedCount">0</div>
+      <div class="stat-lbl">Flagged</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-val blue" id="flagRate">0%</div>
+      <div class="stat-lbl">Flag Rate</div>
+    </div>
+  </div>
+
+  <!-- Platforms -->
+  <div class="section-label">Platforms</div>
+  <div class="platforms">
+    <label><input type="checkbox" data-platform="twitter">  Twitter / X</label>
+    <label><input type="checkbox" data-platform="reddit">   Reddit</label>
+  </div>
+
+  <!-- Threshold -->
+  <div class="section-label">Confidence Threshold</div>
+  <div class="slider-row">
+    <input type="range" id="thresholdSlider" min="0.50" max="0.95" step="0.05" value="0.65">
+    <span id="thresholdVal">65%</span>
+  </div>
+  <div class="slider-hint">Lower = more sensitive · Higher = fewer flags</div>
+
+  <!-- Server -->
+  <div class="section-label">API Server</div>
+  <div class="server-row">
+    <input type="text" id="apiBase" placeholder="http://localhost:8000">
+    <span id="serverDot" class="dot dot-gray" title="Checking...">●</span>
+  </div>
+
+  <!-- Buttons -->
+  <div class="btn-row">
+    <button id="saveBtn">Save</button>
+    <button id="resetBtn">Reset Stats</button>
+  </div>
+  <button id="analysisBtn" class="btn-analysis">
+    Open Analysis Page ↗
+  </button>
+
+  <script src="popup.js"></script>
+</body>
+</html>
