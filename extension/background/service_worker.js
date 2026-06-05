@@ -60,7 +60,10 @@ async function fetchPredict(text, apiBase, threshold) {
   try {
     const res = await fetch(`${apiBase}/predict`, {
       method:  "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type":                "application/json",
+        "ngrok-skip-browser-warning": "true"
+      },
       body:    JSON.stringify({ text }),
       signal:  AbortSignal.timeout(5000)   // 5s max wait
     });

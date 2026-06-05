@@ -12,7 +12,8 @@
     "https://www.youtube.com/*",
     "https://www.reddit.com/*",
     "https://www.facebook.com/*",
-    "http://localhost:8000/*"
+    "http://*/*",
+    "https://*/*"
   ],
 
   "background": {

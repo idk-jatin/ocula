@@ -1,4 +1,9 @@
-const API_BASE = "http://localhost:8000";
+// API base is loaded dynamically from extension settings
+let API_BASE = "http://localhost:8000"; // fallback until storage resolves
+
+chrome.storage.local.get("settings", (data) => {
+  if (data.settings?.apiBase) API_BASE = data.settings.apiBase;
+});
 
 // ── DOM refs ──────────────────────────────────────────────────────
 const inputEl    = document.getElementById("inputText");
@@ -36,7 +41,10 @@ async function analyze() {
   try {
     const res = await fetch(`${API_BASE}/explain`, {
       method:  "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type":                "application/json",
+        "ngrok-skip-browser-warning": "true"
+      },
       body:    JSON.stringify({ text, top_k: 15 }),
       signal:  AbortSignal.timeout(30000)  // 30s timeout for SHAP
     });
@@ -135,7 +143,7 @@ function renderTokenChart(tokens, label) {
 
 // ── Error display ─────────────────────────────────────────────────
 function showError(msg) {
-  errorEl.textContent = `⚠ ${msg} — Make sure the OCULA server is running on ${API_BASE}`;
+  errorEl.textContent = `⚠ ${msg} — Make sure the OCULA server is running on ${API_BASE} (change in extension popup settings)`;
   errorEl.classList.remove("hidden");
 }
 

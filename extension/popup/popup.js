@@ -63,7 +63,8 @@ async function checkServer(apiBase) {
   dot.title       = "Checking...";
   try {
     const res  = await fetch(`${apiBase}/health`, {
-      signal: AbortSignal.timeout(2500)
+      signal:  AbortSignal.timeout(2500),
+      headers: { "ngrok-skip-browser-warning": "true" }
     });
     const data = await res.json();
     if (data.model_loaded) {
